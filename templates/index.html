@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Ventas por Voz - Tienda Virtual</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #06d6a0;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--light-color);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .message-user {
+            text-align: right;
+        }
+
+        .message-agent {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message-user .message-bubble {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message-agent .message-bubble {
+            background: white;
+            color: var(--dark-color);
+            border: 1px solid #e5e7eb;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .voice-btn, .send-btn, .cart-btn {
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .voice-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .voice-btn:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+
+        .voice-btn.recording {
+            background: var(--danger-color);
+            animation: pulse 1s infinite;
+        }
+
+        .voice-mode-btn {
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            background: #6b7280;
+            color: white;
+        }
+
+        .voice-mode-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .voice-mode-btn.active {
+            background: var(--secondary-color);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        .send-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .send-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .cart-btn {
+            background: var(--warning-color);
+            color: white;
+            position: relative;
+        }
+
+        .cart-btn:hover {
+            background: #d97706;
+            transform: scale(1.05);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 15px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--dark-color);
+        }
+
+        .quick-action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Products Section */
+        .products-section {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            display: none;
+        }
+
+        .products-section.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .product-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
+        }
+
+        .product-card.on-sale::before {
+            content: "🔥 OFERTA";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--danger-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0 16px 0 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .product-stock {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: var(--success-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+        }
+
+        .product-stock.low {
+            background: var(--warning-color);
+        }
+
+        .product-stock.out {
+            background: var(--danger-color);
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .product-brand {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-category {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .price-current {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .price-original {
+            font-size: 1rem;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+
+        .price-savings {
+            background: var(--success-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add-cart:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-add-cart:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-details {
+            background: #f3f4f6;
+            color: var(--dark-color);
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .chat-messages {
+                height: 300px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Success notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Chat Section -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1><i class="fas fa-robot"></i> Asistente de Ventas por Voz</h1>
+                <p>Dime qué producto buscas y te ayudo a encontrarlo</p>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message message-agent">
+                    <div class="message-bubble">
+                        ¡Hola! 👋 Soy tu asistente de ventas. Puedo ayudarte a encontrar productos, ver ofertas y agregar artículos a tu carrito.
+
+                        ¿Qué producto estás buscando hoy?
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-group">
+                    <button class="voice-btn" id="voiceBtn" title="Hablar por voz">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <input type="text" class="message-input" id="messageInput"
+                           placeholder="Escribe tu mensaje aquí..." maxlength="500">
+                    <button class="send-btn" id="sendBtn" title="Enviar mensaje">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button class="cart-btn" id="cartBtn" title="Ver carrito">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </button>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="sendQuickMessage('ofertas')">
+                        🔥 Ver ofertas
+                    </button>
+                    <button class="quick-action-btn" onclick="sendQuickMessage('categorías')">
+                        📂 Categorías
+                    </button>
+                    <button class="quick-action-btn" onclick="sendQuickMessage('marcas')">
+                        🏷️ Marcas
+                    </button>
+                    <button class="quick-action-btn" onclick="sendQuickMessage('ayuda')">
+                        ❓ Ayuda
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="products-section" id="productsSection">
+            <h2><i class="fas fa-boxes"></i> Productos Encontrados</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Producto agregado al carrito</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Voice recording variables
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let stream = null;
+        let cartCount = 0;
+        let voiceChatMode = false;
+        let currentAudio = null;
+
+        // Voice settings
+        const voiceSettings = {
+            voice: 'alloy', // alloy, echo, fable, onyx, nova, shimmer
+            playAudio: true
+        };
+
+        // Check for browser compatibility
+        const hasMediaRecorder = 'MediaRecorder' in window;
+        const hasWebAudio = 'AudioContext' in window || 'webkitAudioContext' in window;
+
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const cartBtn = document.getElementById('cartBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const productsSection = document.getElementById('productsSection');
+        const productsGrid = document.getElementById('productsGrid');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+
+        // Create voice mode toggle button
+        const voiceModeBtn = document.createElement('button');
+        voiceModeBtn.className = 'voice-mode-btn';
+        voiceModeBtn.innerHTML = '<i class="fas fa-headset"></i>';
+        voiceModeBtn.title = 'Activar modo conversación por voz';
+        voiceModeBtn.addEventListener('click', toggleVoiceChatMode);
+
+        // Add voice mode button to input area
+        document.querySelector('.input-group').appendChild(voiceModeBtn);
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        voiceBtn.addEventListener('click', toggleVoiceRecording);
+        cartBtn.addEventListener('click', showCart);
+
+        // Initialize voice functionality
+        if (!hasMediaRecorder) {
+            voiceBtn.disabled = true;
+            voiceBtn.title = 'Grabación de voz no disponible en este navegador';
+        }
+
+        // Functions
+        async function initVoiceRecording() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+
+                mediaRecorder.ondataavailable = function(event) {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = function() {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioChunks = [];
+                    processVoiceInput(audioBlob);
+                };
+
+                return true;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showNotification('Error al acceder al micrófono');
+                return false;
+            }
+        }
+
+        async function toggleVoiceRecording() {
+            if (!hasMediaRecorder) {
+                showNotification('Grabación de voz no disponible en este navegador');
+                return;
+            }
+
+            if (isRecording) {
+                stopRecording();
+            } else {
+                await startRecording();
+            }
+        }
+
+        async function startRecording() {
+            if (!mediaRecorder || stream.getTracks().length === 0) {
+                const success = await initVoiceRecording();
+                if (!success) return;
+            }
+
+            audioChunks = [];
+            isRecording = true;
+            voiceBtn.classList.add('recording');
+            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            voiceBtn.title = 'Detener grabación';
+
+            mediaRecorder.start();
+            showNotification('🎤 Grabando... Habla ahora');
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                voiceBtn.classList.remove('recording');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                voiceBtn.title = 'Iniciar grabación de voz';
+                showNotification('⏹️ Procesando audio...');
+            }
+        }
+
+        async function processVoiceInput(audioBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+
+                if (voiceChatMode) {
+                    formData.append('voice', voiceSettings.voice);
+                    await processVoiceChat(formData);
+                } else {
+                    await processSpeechToText(formData);
+                }
+            } catch (error) {
+                console.error('Error processing voice input:', error);
+                showNotification('Error al procesar el audio');
+            }
+        }
+
+        async function processSpeechToText(formData) {
+            try {
+                showTyping();
+
+                const response = await fetch('/api/voice/speech-to-text', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    messageInput.value = data.transcription;
+                    addMessage(data.transcription, 'user');
+                    sendMessage();
+                } else {
+                    showNotification('No se pudo entender el audio. Intenta de nuevo.');
+                }
+            } catch (error) {
+                hideTyping();
+                console.error('Error in speech-to-text:', error);
+                showNotification('Error al procesar el audio');
+            }
+        }
+
+        async function processVoiceChat(formData) {
+            try {
+                showTyping();
+
+                const response = await fetch('/api/voice/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.success) {
+                    // Add user input to chat
+                    addMessage(data.user_input, 'user');
+
+                    // Add agent response to chat
+                    addMessage(data.agent_response, 'agent');
+
+                    // Update cart and products
+                    updateCartBadge(data.cart_count);
+
+                    if (data.show_products && data.products) {
+                        displayProducts(data.products);
+                    } else {
+                        hideProducts();
+                    }
+
+                    // Play audio response if available
+                    if (data.audio_url && voiceSettings.playAudio) {
+                        await playAudioResponse(data.audio_url);
+                    }
+                } else {
+                    showNotification('No se pudo procesar la conversación de voz');
+                }
+            } catch (error) {
+                hideTyping();
+                console.error('Error in voice chat:', error);
+                showNotification('Error en la conversación de voz');
+            }
+        }
+
+        async function playAudioResponse(audioUrl) {
+            try {
+                // Stop any currently playing audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+
+                currentAudio = new Audio(audioUrl);
+                currentAudio.volume = 0.8;
+
+                // Add visual indicator when playing
+                const playingIndicator = document.createElement('div');
+                playingIndicator.className = 'message message-agent';
+                playingIndicator.id = 'audio-playing';
+
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble';
+                bubbleDiv.innerHTML = '<i class="fas fa-volume-up fa-pulse"></i> Reproduciendo respuesta...';
+
+                playingIndicator.appendChild(bubbleDiv);
+                chatMessages.appendChild(playingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                await currentAudio.play();
+
+                currentAudio.onended = function() {
+                    const indicator = document.getElementById('audio-playing');
+                    if (indicator) {
+                        indicator.remove();
+                    }
+                    currentAudio = null;
+                };
+
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                const indicator = document.getElementById('audio-playing');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+
+        function toggleVoiceChatMode() {
+            voiceChatMode = !voiceChatMode;
+
+            if (voiceChatMode) {
+                voiceModeBtn.classList.add('active');
+                voiceModeBtn.innerHTML = '<i class="fas fa-headset"></i>';
+                voiceModeBtn.title = 'Desactivar modo conversación por voz';
+                voiceBtn.title = 'Hablar con el asistente (con respuesta de voz)';
+                showNotification('🎧 Modo conversación por voz activado');
+
+                // Test voice synthesis
+                testVoice();
+            } else {
+                voiceModeBtn.classList.remove('active');
+                voiceModeBtn.innerHTML = '<i class="fas fa-headset"></i>';
+                voiceModeBtn.title = 'Activar modo conversación por voz';
+                voiceBtn.title = 'Grabar mensaje de voz';
+                showNotification('💬 Modo conversación por voz desactivado');
+
+                // Stop any playing audio
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+            }
+        }
+
+        async function testVoice() {
+            try {
+                const response = await fetch('/api/voice/test');
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const testAudio = new Audio(audioUrl);
+                    testAudio.volume = 0.6;
+                    await testAudio.play();
+                }
+            } catch (error) {
+                console.error('Error testing voice:', error);
+            }
+        }
+
+        async function speakText(text) {
+            if (!voiceSettings.playAudio) return;
+
+            try {
+                const response = await fetch('/api/voice/text-to-speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        voice: voiceSettings.voice
+                    })
+                });
+
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    await playAudioResponse(audioUrl);
+                }
+            } catch (error) {
+                console.error('Error generating speech:', error);
+            }
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            messageInput.value = '';
+
+            // Show loading
+            showTyping();
+
+            // Send to server
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTyping();
+
+                if (data.error) {
+                    addMessage('Lo siento, hubo un error: ' + data.error, 'agent');
+                } else {
+                    addMessage(data.response, 'agent');
+
+                    // Update cart count
+                    updateCartBadge(data.cart_count);
+
+                    // Show products if available
+                    if (data.show_products && data.products) {
+                        displayProducts(data.products);
+                    } else {
+                        hideProducts();
+                    }
+                }
+            })
+            .catch(error => {
+                hideTyping();
+                console.error('Error:', error);
+                addMessage('Lo siento, hubo un error de conexión.', 'agent');
+            });
+        }
+
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage();
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${sender}`;
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.textContent = text;
+
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message message-agent';
+            typingDiv.id = 'typing-indicator';
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Escribiendo...';
+
+            typingDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function updateCartBadge(count) {
+            cartCount = count;
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        function showCart() {
+            fetch('/api/cart')
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'agent');
+                updateCartBadge(data.cart_count);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Error al obtener el carrito.', 'agent');
+            });
+        }
+
+        function displayProducts(products) {
+            productsGrid.innerHTML = '';
+
+            products.forEach((product, index) => {
+                const productCard = createProductCard(product, index);
+                productsGrid.appendChild(productCard);
+            });
+
+            productsSection.classList.add('show');
+        }
+
+        function hideProducts() {
+            productsSection.classList.remove('show');
+        }
+
+        function createProductCard(product, index) {
+            const card = document.createElement('div');
+            card.className = `product-card${product.en_descuento ? ' on-sale' : ''}`;
+
+            // Determine stock status
+            let stockClass = 'product-stock';
+            let stockText = `${product.unidades_disponibles} disponibles`;
+
+            if (product.unidades_disponibles === 0) {
+                stockClass += ' out';
+                stockText = 'Agotado';
+            } else if (product.unidades_disponibles < 5) {
+                stockClass += ' low';
+                stockText = `Solo ${product.unidades_disponibles}`;
+            }
+
+            // Create price display
+            let priceHTML = `<span class="price-current">$${product.precio.toLocaleString()}</span>`;
+
+            if (product.en_descuento && product.precio_descuento) {
+                const savings = Math.round(((product.precio - product.precio_descuento) / product.precio) * 100);
+                priceHTML = `
+                    <span class="price-current">$${product.precio_descuento.toLocaleString()}</span>
+                    <span class="price-original">$${product.precio.toLocaleString()}</span>
+                    <span class="price-savings">-${savings}%</span>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="product-image">
+                    📦
+                    <div class="${stockClass}">${stockText}</div>
+                </div>
+                <div class="product-title">${product.nombre}</div>
+                <div class="product-brand">${product.marca}</div>
+                <div class="product-category">${product.categoria}</div>
+                <div class="product-price">
+                    ${priceHTML}
+                </div>
+                <div class="product-actions">
+                    <button class="btn-add-cart" onclick="addToCart(${index})"
+                            ${product.unidades_disponibles === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-cart-plus"></i>
+                        ${product.unidades_disponibles === 0 ? 'Agotado' : 'Agregar'}
+                    </button>
+                    <button class="btn-details" onclick="getProductDetails(${index})" title="Ver detalles">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function addToCart(productIndex) {
+            fetch('/api/add-to-cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productIndex,
+                    quantity: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartBadge(data.cart_count);
+                    showNotification('¡Producto agregado al carrito!');
+                    addMessage(data.message, 'agent');
+                } else {
+                    addMessage('Error al agregar producto al carrito.', 'agent');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Error al agregar producto al carrito.', 'agent');
+            });
+        }
+
+        function getProductDetails(productIndex) {
+            fetch(`/api/product/${productIndex}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    addMessage('Error al obtener detalles del producto.', 'agent');
+                } else {
+                    const details = `📋 **Detalles de ${data.nombre}**
+
+🏷️ Marca: ${data.marca}
+📂 Categoría: ${data.categoria}
+💰 Precio: ${data.formatted_price}
+📦 Stock: ${data.unidades_disponibles} unidades
+🚚 Envío: ${data.metodo_envio}
+💳 Pago: ${data.metodos_pago}
+💰 Financiación: ${data.opciones_financiacion}
+↩️ Devoluciones: ${data.politicas_devolucion}
+
+📝 Instrucciones: ${data.instrucciones_compra}`;
+
+                    addMessage(details, 'agent');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Error al obtener detalles del producto.', 'agent');
+            });
+        }
+
+        function showNotification(message) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Send initial greeting
+            fetch('/api/greet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: '' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    // Clear default message and add server greeting
+                    chatMessages.innerHTML = '';
+                    addMessage(data.response, 'agent');
+                    updateCartBadge(data.cart_count || 0);
+                }
+            })
+            .catch(error => {
+                console.error('Error initializing:', error);
+            });
+        });
+    </script>
+</body>
+</html>
