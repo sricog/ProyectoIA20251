@@ -26,17 +26,22 @@ Un asistente de ventas inteligente con capacidades de voz que combina inteligenc
 ## 🏗️ Estructura del Proyecto
 
 ```
+ProyectoIA20251/
 ├── sales_assistant.py          # Clase principal del asistente de voz
 ├── voice_sales_app_optimized.py # Aplicación web Flask
-├── product_database.py         # Base de datos de productos (requerido)
-├── templates/
-│   └── voice_index.html        # Interfaz web (requerido)
-└── README.md
+├── product_database.py         # Base de datos de productos
+├── requirements.txt            # Dependencias del proyecto
+├── data/                       # Datos de productos
+├── templates/                  # Plantillas HTML
+│   └── voice_index.html        # Interfaz web
+├── .gitignore                  # Archivos ignorados por Git
+└── README.md                   # Este archivo
 ```
 
 ## 📋 Requisitos
 
 ### Dependencias Python
+Las dependencias están listadas en `requirements.txt`:
 ```
 flask
 livekit-agents
@@ -56,13 +61,13 @@ numpy
 
 ### 1. Clonar el repositorio
 ```bash
-git clone <repository-url>
-cd voice-sales-assistant
+git clone https://github.com/sricog/ProyectoIA20251.git
+cd ProyectoIA20251
 ```
 
 ### 2. Instalar dependencias
 ```bash
-pip install flask livekit-agents livekit-plugins-openai livekit-plugins-elevenlabs livekit-plugins-silero openai pandas numpy
+pip install -r requirements.txt
 ```
 
 ### 3. Configurar variables de entorno
@@ -75,11 +80,6 @@ $env:ELEVENLABS_API_KEY = "tu-api-key-de-elevenlabs"  # Opcional
 export OPENAI_API_KEY="tu-api-key-de-openai"
 export ELEVENLABS_API_KEY="tu-api-key-de-elevenlabs"  # Opcional
 ```
-
-### 4. Crear archivos adicionales requeridos
-Necesitarás crear:
-- `product_database.py` - Base de datos de productos
-- `templates/voice_index.html` - Interfaz web
 
 ## 🎮 Uso
 
@@ -186,12 +186,7 @@ El sistema automáticamente usa OpenAI TTS como fallback.
 Asegúrate de que el navegador soporte grabación de audio y que tengas permisos de micrófono.
 
 ### Base de datos de productos no encontrada
-Crea el archivo `product_database.py` con la estructura requerida:
-```python
-def get_product_database():
-    # Tu implementación aquí
-    pass
-```
+El archivo `product_database.py` ya está incluido en el repositorio y debería funcionar automáticamente.
 
 ## 📊 Métricas de Rendimiento
 
@@ -203,7 +198,7 @@ def get_product_database():
 
 ## 🤝 Contribuir
 
-1. Fork el proyecto
+1. Fork el proyecto desde [GitHub](https://github.com/sricog/ProyectoIA20251)
 2. Crea una branch para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la branch (`git push origin feature/AmazingFeature`)
@@ -225,14 +220,27 @@ Este proyecto está bajo la Licencia MIT - ver el archivo `LICENSE` para detalle
 ## 🚀 ¡Empieza Ahora!
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/sricog/ProyectoIA20251.git
+cd ProyectoIA20251
+
+# Instalar dependencias
+pip install -r requirements.txt
+
 # Configurar API key
 $env:OPENAI_API_KEY = "tu-api-key"
 
 # Ejecutar la aplicación
 python voice_sales_app_optimized.py
 
-# Abrir navegador
-# http://localhost:5000
+# Abrir navegador en http://localhost:5000
 ```
 
 **¡Tu asistente de ventas por voz está listo! 🎉**
+
+## 🔗 Enlaces
+
+- **Repositorio**: [https://github.com/sricog/ProyectoIA20251](https://github.com/sricog/ProyectoIA20251)
+- **Documentación OpenAI**: [https://platform.openai.com/docs](https://platform.openai.com/docs)
+- **ElevenLabs API**: [https://elevenlabs.io/docs](https://elevenlabs.io/docs)
+- **LiveKit Agents**: [https://docs.livekit.io/agents](https://docs.livekit.io/agents)
